@@ -1,0 +1,5 @@
+#compdef aria2c
+
+# Zsh completion definition for aria2c
+
+compdef _gnu_generic aria2c

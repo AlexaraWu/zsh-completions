@@ -1,0 +1,163 @@
+#compdef diskutil
+
+# Zsh completion definition for diskutil
+
+function _diskutil() {
+  local context curcontext=$curcontext state line ret=1
+  declare -A opt_args
+
+  local -a commands
+  commands=(
+  'list:List the partitions of a disk'
+  'info:Get information on a specific disk or partition'
+  'information:Get information on a specific disk or partition'
+  'listFilesystems:List file systems available for formatting'
+  'activity:Continuous log of system-wide disk arbitration'
+  'umount:Unmount a single volume'
+  'unmount:Unmount a single volume'
+  'unmountDisk:Unmount an entire disk (all volumes)'
+  'eject:Eject a disk'
+  'mount:Mount a single volume'
+  'mountDisk:Mount an entire disk (all mountable volumes)'
+  'enableJournal:Enable HFS+ journaling on a mounted HFS+ volume'
+  'disableJournal:Disable HFS+ journaling on a mounted HFS+ volume'
+  'moveJournal:Move the HFS+ journal onto another volume'
+  'enableOwnership:Exact on-disk User/Group IDs on a mounted volume'
+  'disableOwnership:Ignore on-disk User/Group IDs on a mounted volume'
+  'rename:Rename a volume'
+  'renameVolume:Rename a volume'
+  'verifyVolume:Verify the file system data structures of a volume'
+  'repairVolume:Repair the file system data structures of a volume'
+  'verifyDisk:Verify the components of a partition map of a disk'
+  'repairDisk:Repair the components of a partition map of a disk'
+  'eraseDisk:Erase an existing disk, removing all volumes'
+  'eraseVolume:Erase an existing volume'
+  'reformat:Erase an existing volume with same name and type'
+  'eraseOptical:Erase optical media (CD/RW, DVD/RW, etc.)'
+  'zeroDisk:Erase a disk, writing zeros to the media'
+  'randomDisk:Erase a disk, writing random data to the media'
+  'secureErase:Securely erase a disk or freespace on a volume'
+  'partitionDisk:(re)Partition a disk, removing all volumes'
+  'resizeVolume:Resize a volume, increasing or decreasing its size'
+  'splitPartition:Split an existing partition into two or more'
+  'mergePartitions:Combine two or more existing partitions into one'
+  'appleRAID:Perform additional verbs related to AppleRAID'
+  'coreStorage:Perform additional verbs related to CoreStorage'
+  'apfs:Perform additional verbs related to APFS'
+  )
+
+  _arguments -C \
+    "1: :{_describe 'diskutil subcommand' commands}" \
+    '*:: :->args' \
+    && ret=0
+
+  case $state in
+    args)
+      case $words[1] in
+        apfs)
+          local -a apfs_cmds
+          apfs_cmds=(
+          'list:Show status of all current APFS Containers'
+          'create:Create a new APFS Container with one APFS Volume'
+          'createContainer:Create a new empty APFS Container'
+          'deleteContainer:Delete an APFS Container and reformat old disks to HFS'
+          'resizeContainer:Resize an APFS Container and its disk space usage'
+          'addVolume:Export a new APFS Volume from an APFS Container'
+          'deleteVolume:Remove an APFS Volume from its APFS Container'
+          'eraseVolume:Erase contents of, but keep, an APFS Volume'
+          {chrole,changeVolumeRole}:'Change the Role metadata bits of an APFS Volume'
+          )
+          _arguments -C \
+            "1: :{_describe 'apfs subcommand' apfs_cmds}" \
+            '*:: :->args' \
+            && ret=0
+
+          case $words[1] in
+            list)
+              _arguments -C \
+                '-plist[property list will be emitted instead of the normal user-readable output]'\
+                && ret=0
+              ;;
+            create)
+              _arguments -C \
+                '1:where MountPoint|DiskIdentifier|DeviceNode' \
+                '2:name' \
+                && ret=0
+              ;;
+            createContainer)
+              _arguments -C \
+                '1:where MountPoint|DiskIdentifier|DeviceNode' \
+                && ret=0
+              ;;
+            deleteContainer)
+              _arguments -C \
+                '1:<containerRefDisk> Container Reference DiskIdentifier' \
+                '2:<name> new name (base) for the old Physical Store(s)' \
+                '3:<physicalStoreDisk> DiskIdentifier to use if Container damaged' \
+                && ret=0
+              ;;
+            resizeContainer)
+              _arguments -C \
+                '1:<physicalStoreDisk> A Physical Store disk backing the Container' \
+                '2:<newSize> The desired new on-disk size for that Physical Store' \
+                '3:<triple> A { fileSystemPersonality, name, size } tuple' \
+                && ret=0
+              ;;
+            addVolume)
+              _arguments -C \
+                '-reserve[optional minimum guaranteed file data capacity]:reserveSize' \
+                '-quota[optional maximum file data usage limit]:quotaSize' \
+                (-fileencryption -encryption -crypt){-fileencryption,-encryption,-crypt}'[enable per-file encryption]' \
+                '-effaceable[enable O(1)-time cryptographic erase]' \
+                '-role[one or more of 0|B|U|S|R|V; see changeVolumeRole]:roles' \
+                '-nomount[nomount]' \
+                '-mountpoint[]:mountPoint' \
+                '1:<physicalStoreDisk> A Physical Store disk backing the Container' \
+                '2:<newSize> The desired new on-disk size for that Physical Store' \
+                '3:<triple> A { fileSystemPersonality, name, size } tuple' \
+                && ret=0
+              ;;
+            deleteVolume)
+              _arguments -C \
+                '1:<apfsVolumeDisk> APFS Volume DiskIdentifier' \
+                && ret=0
+              ;;
+            eraseVolume)
+              _arguments -C \
+                '1:<apfsVolumeDisk> APFS Volume DiskIdentifier' \
+                && ret=0
+              ;;
+            (chrole|changeVolumeRole)
+              _arguments -C \
+                '1:<apfsVolumeDisk> APFS Volume DiskIdentifier' \
+                '2:<roles> one or more of 0|clear|b|u|s|r|v|B|U|S|R|V' \
+                && ret=0
+              ;;
+          esac
+          ;;
+        list)
+          _arguments \
+            '-plist[output user-readable property list]'
+            '*:devices:__devices'
+          ;;
+        info)
+          _arguments \
+            '-plist[output user-readable property list]' \
+            '-all[output the all disks whole disks and their partitions]'
+            '*:devices:__devices'
+          ;;
+        activity)
+          _arguments \
+          ;;
+        listFilesystems)
+          _arguments \
+            '-plist[output user-readable property list]'
+          ;;
+      esac
+      ;;
+  esac
+
+  return ret
+}
+
+_diskutil "$@"
