@@ -4,11 +4,12 @@ my zsh completion functions.
 
 ## Command list
 
+- `conda`
+- `diskutil`
 - `p7zip`
   - `7z`
   - `7za`
   - `7zr`
-- `diskutil`
 - `pandoc`
 - `you-get`
 
